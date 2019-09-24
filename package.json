@@ -1,0 +1,21 @@
+{
+  "name": "next-effector-example",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "effector": "^20.2.1",
+    "next": "9.0.5",
+    "react": "16.9.0",
+    "react-dom": "16.9.0",
+    "effector-react": "^20.3.0",
+    "isomorphic-fetch": "^2.2.1"
+  },
+  "devDependencies": {
+    "@effector/babel-plugin": "^0.4.0"
+  }
+}
