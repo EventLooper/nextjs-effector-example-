@@ -1,21 +1,18 @@
-import React, { Component } from 'react'
-import { fetchPosts,PostList } from '../src/features/Feed'
+import React from 'react'
+import Link from 'next/link'
+import { PostList } from '../src/features/Feed'
 
 
-class Home extends Component {
-    static async getInitialProps(appContext) {
-        const { results } = await fetchPosts({})
-
-        return { results }
-    }
-
-
-
-    render() {
-        return <div>
-            <PostList />
+const Home = () => {
+    return (
+        <div>
+            <PostList/>
+            <Link href="/about"><a>About</a></Link>
         </div>
-    }
+    )
+}
+Home.getInitialProps = async ({storeManager}) => {
+    console.log(storeManager.scope.getState())
 }
 
 export default Home

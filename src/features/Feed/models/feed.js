@@ -1,18 +1,17 @@
-import { createEffect, createEvent } from 'effector';
+import { createEffect, createEvent,createStore } from 'effector';
 
-import { createUniversalStore } from '../../../Lib/domains/universal'
+import { useClearOnUnmount } from '../../../Lib/scope';
 
-export const loadMore = createEvent('load more')
 
-export const fetchPosts = createEffect({
-    async handler({ limit = 20, offset = 0 }) {
-        console.log(limit,offset)
-        const res = await fetch(`https://api.nytimes.com/svc/news/v3/content/all/all.json?api-key=${process.env.API_KEY}&limit=${limit}&offset=${offset}`)
-        return res.json()
-    }
-});
-
-export const paginationStore = createUniversalStore({
+export const createPostsStore = createUniversalStore => {
+     const loadMore = createEvent('load more')
+     const fetchPosts = createEffect({
+        async handler({ limit = 20, offset = 0 }) {
+            const res = await fetch(`https://api.nytimes.com/svc/news/v3/content/all/all.json?api-key=${process.env.API_KEY}&limit=${limit}&offset=${offset}`)
+            return res.json()
+        }
+    });
+     const paginationStore = createStore({
         limit: 20,
         offset: 0
     })
@@ -20,6 +19,7 @@ export const paginationStore = createUniversalStore({
         .watch(loadMore, state => {
             fetchPosts(state)
         })
-;
+    const postsStore = createUniversalStore([]).on(fetchPosts.done, (state, { result }) => result.results);
+    return useClearOnUnmount({ postsStore })
+}
 
-export const postsStore = createUniversalStore([]).on(fetchPosts.done, (state, { result }) => [...state, ...result.results])

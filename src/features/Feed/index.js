@@ -1,2 +1,2 @@
-export { postsStore, fetchPosts } from './models'
+export { createPostsStore } from './models'
 export { PostList } from './containers'

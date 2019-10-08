@@ -1,1 +1,1 @@
-export { postsStore, fetchPosts, paginationStore ,loadMore} from './feed'
+export { createPostsStore } from './feed'
