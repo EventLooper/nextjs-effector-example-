@@ -18,6 +18,7 @@ export const createScope = () => {
         initialized: false,
     })
     const addEntries = createEvent()
+    const getOrAdd = (storeKey,entriesFabric) => ({})
     scope.on(addEntries, (scope, entriesFabric) => {
         if (scope.initialized) return scope
         return {
@@ -32,6 +33,7 @@ let destroy = null
 
 export function readScope(key, defaults) {
     const { scope } = React.useContext(manager)
+    const storeCreator = scope.getState().state.store
     let newShapes = null
     const result = useStoreMap({
         store: scope,
@@ -42,7 +44,7 @@ export function readScope(key, defaults) {
             let success = false
             let result
             try {
-                result = defaults(state)
+                result = defaults(storeCreator,state)
                 success = true
                 newShapes = destroy
             } finally {
