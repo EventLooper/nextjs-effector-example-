@@ -1,7 +1,6 @@
 import { createDomain } from 'effector'
 
 
-
 export const createUniversalDomain = () => {
 
     const universal = createDomain('universal')
@@ -14,8 +13,9 @@ export const createUniversalDomain = () => {
                 store.setState(universalStoresMap[store.sid])
 
             }
+            console.log('RESTORE EFFECTOR STORE ON CLIENT:', store)
         }
     })
-    return  universal;
+    return { universal };
 
 }

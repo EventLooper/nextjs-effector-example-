@@ -5,7 +5,7 @@ import { useStoreMap } from 'effector-react'
 const manager = React.createContext()
 
 export function ScopeProvider({ scopeStore, entries, children }) {
-    scopeStore.addEntries(entries)
+    scopeStore.addEntries({ entriesFabric: entries })
 
     const child = typeof children === 'function' ? children() : children
 
@@ -13,36 +13,45 @@ export function ScopeProvider({ scopeStore, entries, children }) {
 }
 
 export const createScope = () => {
-    const scope = createStore({
-        state: {},
-        initialized: false,
-    })
+    const scope = createStore({})
     const addEntries = createEvent()
-    scope.on(addEntries, (scope, entriesFabric) => {
-        if (scope.initialized) return scope
-        return {
-            initialized: true,
-            state: entriesFabric(),
-        }
+
+    scope.on(addEntries, (scope, { entriesFabric, storeCreator }) => {
+        return { ...scope, ...entriesFabric(storeCreator) }
     })
-    return { scope, addEntries }
+
+    const getOrAdd = (storeKey, entriesFabric) => {
+        const scopeState = scope.getState()
+        const storeCreator = scopeState.universal.store
+         //TODO replace getState with samples
+        if (!scopeState[storeKey]) {
+            addEntries({ entriesFabric, storeCreator })
+        }
+       console.log(scope.getState())
+
+        return scope.getState()[storeKey]
+    }
+
+    return { scope, addEntries, getOrAdd }
 }
 
 let destroy = null
 
 export function readScope(key, defaults) {
     const { scope } = React.useContext(manager)
+    const { universal } = scope.getState()
+
     let newShapes = null
     const result = useStoreMap({
         store: scope,
         keys: [key],
-        fn({ state }, [key]) {
+        fn(state, [key]) {
             if (key in state) return state[key]
             destroy = []
             let success = false
             let result
             try {
-                result = defaults(state)
+                result = defaults(universal.store, state)
                 success = true
                 newShapes = destroy
             } finally {

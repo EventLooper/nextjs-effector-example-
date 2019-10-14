@@ -9,22 +9,22 @@ class MyApp extends App {
 
     static async getInitialProps({ Component, ctx, ...rest }) {
         let pageProps = {};
-        const scope = createScope()
-        scope.addEntries(createUniversalDomain)
-        Component.storeManager = scope
+        const { scope, addEntries, getOrAdd } = createScope()
+        addEntries({ entriesFabric: createUniversalDomain })
+        Component.storeManager = { scope, addEntries, getOrAdd }
 
         if (Component.getInitialProps) {
-            pageProps = await Component.getInitialProps({ ctx, storeManager: scope });
+            pageProps = await Component.getInitialProps({ ctx, storeManager: { scope, addEntries, getOrAdd } });
 
         }
+        const { universal } = scope.getState()
+        const universalStoresMap = Array.from(universal.history.stores).reduce((acc, store) => {
+            acc[store.sid] = store.getState()
+            return acc
+        }, {})
 
-        // const universalStoresMap = Array.from(universal.history.stores).reduce((acc, store) => {
-        //     acc[store.sid] = store.getState()
-        //     return acc
-        // }, {})
 
-
-        return { ...pageProps }
+        return { ...pageProps, universalStoresMap }
 
     }
 
