@@ -1,6 +1,5 @@
 import React from 'react'
 import { clearNode, createEvent, createStore, is } from 'effector'
-import { useStoreMap } from 'effector-react'
 
 const manager = React.createContext()
 
@@ -23,11 +22,11 @@ export const createScope = () => {
     const getOrAdd = (storeKey, entriesFabric) => {
         const scopeState = scope.getState()
         const storeCreator = scopeState.universal.store
-         //TODO replace getState with samples
+        //TODO replace getState with samples
         if (!scopeState[storeKey]) {
             addEntries({ entriesFabric, storeCreator })
         }
-       console.log(scope.getState())
+        console.log(scope.getState())
 
         return scope.getState()[storeKey]
     }
@@ -38,33 +37,37 @@ export const createScope = () => {
 let destroy = null
 
 export function readScope(key, defaults) {
-    const { scope } = React.useContext(manager)
+    const { scope, addEntries, getOrAdd } = React.useContext(manager)
     const { universal } = scope.getState()
 
     let newShapes = null
-    const result = useStoreMap({
-        store: scope,
-        keys: [key],
-        fn(state, [key]) {
-            if (key in state) return state[key]
-            destroy = []
-            let success = false
-            let result
-            try {
-                result = defaults(universal.store, state)
-                success = true
-                newShapes = destroy
-            } finally {
-                if (!success) clearShape(destroy)
-                destroy = null
-            }
-            state[key] = result
-            return result
-        },
-    })
-    const shapes = React.useMemo(() => newShapes, [key])
-    useClearOnUnmount(shapes)
-    return result
+    // const result = useStoreMap({
+    //     store: scope,
+    //     keys: [key],
+    //     fn(state, [key]) {
+    //         if (key in state) {
+    //             console.log(state)
+    //             return state[key]
+    //         }
+    //         destroy = []
+    //         let success = false
+    //         let result
+    //         try {
+    //             result = defaults(universal.store, state)
+    //             success = true
+    //             newShapes = destroy
+    //         } finally {
+    //             if (!success) clearShape(destroy)
+    //             destroy = null
+    //         }
+    //         state[key] = result
+    //         return result
+    //     },
+    // })
+
+    //const shapes = React.useMemo(() => newShapes, [key])
+    //useClearOnUnmount(shapes)
+    return getOrAdd(key, defaults)
 }
 
 export function useClearOnUnmount(shape) {
