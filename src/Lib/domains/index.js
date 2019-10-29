@@ -1,1 +1,1 @@
-export { createUniversalDomain} from './universal'
+export { universal } from './universal'

@@ -1,12 +1,11 @@
 import React from 'react'
 import Link from 'next/link'
-import { useList } from 'effector-react'
-import { readScope } from '../../../../src/Lib/scope'
-import { createPostsStore } from '../models';
+import { useList } from '@zerobias/effector-react/ssr'
+import { postsStore } from '../models';
 
 
 export const PostList = () => {
-    const { postsStore } = readScope('posts', createPostsStore)
+
     const posts = useList(postsStore, (p) => <div>
         <h2>{p.title}</h2>
         <p>{p.abstract}</p>
@@ -14,10 +13,7 @@ export const PostList = () => {
             <a>div post</a>
         </Link>
     </div>);
-    // const handleLoadMore = useCallback(() => {
-    //     loadMore()
-    //
-    // })
+
 
     return <div>
         {posts}

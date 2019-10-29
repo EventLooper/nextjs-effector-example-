@@ -1,41 +1,60 @@
 import React from 'react'
 import App from 'next/app'
+import { createEvent } from 'effector'
+import { createScope, fork, Provider, serialize } from '@zerobias/effector-react/ssr'
 import "isomorphic-fetch"
-import { createScope, ScopeProvider } from '../src/Lib/scope';
-import { createUniversalDomain } from '../src/Lib/domains'
+import { universal } from '../src/Lib/domains';
 
+const start = createEvent()
 
 class MyApp extends App {
 
     static async getInitialProps({ Component, ctx, ...rest }) {
         let pageProps = {};
-        const { scope, addEntries, getOrAdd } = createScope()
-        addEntries({ entriesFabric: createUniversalDomain })
-        Component.storeManager = { scope, addEntries, getOrAdd }
-
         if (Component.getInitialProps) {
-            pageProps = await Component.getInitialProps({ ctx, storeManager: { scope, addEntries, getOrAdd } });
+            pageProps = await Component.getInitialProps({ ctx });
 
         }
-        const { universal } = scope.getState()
-        const universalStoresMap = Array.from(universal.history.stores).reduce((acc, store) => {
-            acc[store.sid] = store.getState()
-            return acc
-        }, {})
+        const rootScope = createScope({ domain: universal })
+        const forkedScope = await fork(rootScope, { ctx: { ...ctx, ...rest } })
+        const state = serialize(forkedScope)
+
+        Component.scope = forkedScope
 
 
-        return { ...pageProps, universalStoresMap }
+        return { ...pageProps, initialState: state }
+    }
+
+    state = {
+        scope: this.props.Component.scope
+    }
+
+    componentDidMount() {
+        this.forkClientScope()
+    }
+
+
+    forkClientScope = async () => {
+        const { scope } = this.state
+        if (!scope) {
+            const rootScope = createScope({ domain: universal })
+            const scope = await fork(rootScope, { ctx: {} });
+
+            this.setState({ scope })
+        }
 
     }
 
-    scope = this.props.Component.storeManager || createScope()
 
     render() {
+        const { scope } = this.state;
         const { Component, pageProps } = this.props;
 
-        return <ScopeProvider scopeStore={this.scope} entries={createUniversalDomain}>
-            <Component {...pageProps} />
-        </ScopeProvider>
+        return scope
+            ? <Provider value={scope}>
+                <Component {...pageProps} />
+            </Provider>
+            : 'Loading ...'
 
 
     }

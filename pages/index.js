@@ -1,7 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
-
-import { createPostsStore, PostList } from '../src/features/Feed'
+import { fetchPosts, PostList } from '../src/features/Feed'
 
 
 const Home = () => {
@@ -13,8 +12,8 @@ const Home = () => {
         </div>
     )
 }
-Home.getInitialProps = async ({ storeManager }) => {
-    const { fetchPosts } = storeManager.getOrAdd('posts', createPostsStore)
+Home.getInitialProps = async ({}) => {
+
 
     await fetchPosts({})
 
