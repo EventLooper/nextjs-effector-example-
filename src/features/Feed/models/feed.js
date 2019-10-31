@@ -4,6 +4,7 @@ import { universal } from '../../../Lib/domains';
 const loadMore = universal.event('load more')
 const fetchPosts = universal.effect({
     async handler({ limit = 20, offset = 0 }) {
+        console.log('FETHED')
         const res = await fetch(`https://api.nytimes.com/svc/news/v3/content/all/all.json?api-key=${process.env.API_KEY}&limit=${limit}&offset=${offset}`)
         return res.json()
     }

@@ -10,7 +10,7 @@
   "dependencies": {
     "@zerobias/effector-react": "^20.4.0-4efb57b6",
     "effector": "^20.5.0",
-    "effector-react": "^20.4.0",
+    "effector-react": "^20.",
     "isomorphic-fetch": "^2.2.1",
     "next": "9.0.7",
     "react": "16.9.0",

@@ -1,7 +1,7 @@
 import React from 'react'
 import App from 'next/app'
 import { createEvent } from 'effector'
-import { createScope, fork, Provider, serialize } from '@zerobias/effector-react/ssr'
+import { createScope, fork, hydrate, Provider, serialize } from '@zerobias/effector-react/ssr'
 import "isomorphic-fetch"
 import { universal } from '../src/Lib/domains';
 
@@ -11,17 +11,19 @@ class MyApp extends App {
 
     static async getInitialProps({ Component, ctx, ...rest }) {
         let pageProps = {};
+
+        //#TODO pass universal context with routing info both on client hook and server
+        //#TODO investigate best practice to bind uniq start event to each page
+        const rootScope = createScope({ domain: universal })
+        const forkedScope = await fork(rootScope, { ctx: { ...ctx, ...rest } })
+
+        Component.scope = forkedScope
         if (Component.getInitialProps) {
             pageProps = await Component.getInitialProps({ ctx });
 
         }
-        const rootScope = createScope({ domain: universal })
-        const forkedScope = await fork(rootScope, { ctx: { ...ctx, ...rest } })
+
         const state = serialize(forkedScope)
-
-        Component.scope = forkedScope
-
-
         return { ...pageProps, initialState: state }
     }
 
@@ -35,13 +37,16 @@ class MyApp extends App {
 
 
     forkClientScope = async () => {
-        const { scope } = this.state
-        if (!scope) {
-            const rootScope = createScope({ domain: universal })
-            const scope = await fork(rootScope, { ctx: {} });
 
-            this.setState({ scope })
-        }
+        const { initialState } = this.props
+        console.log(initialState)
+        hydrate(universal, { values: initialState })
+
+        const rootScope = createScope({ domain: universal })
+        const scope = await fork(rootScope, { ctx: {} });
+
+        this.setState({ scope })
+
 
     }
 
