@@ -1,6 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
-import { fetchPosts, PostList } from '../src/features/Feed'
+import { fetchPosts, PostList, started } from '../src/features/Feed'
 
 
 const Home = () => {
@@ -14,9 +14,10 @@ const Home = () => {
 }
 Home.getInitialProps = async ({}) => {
 
-
-    await fetchPosts({})
-
+    return fetchPosts({})
 }
+
+
+Home.preload = started
 
 export default Home
